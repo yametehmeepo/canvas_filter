@@ -1,1 +1,2 @@
 # canvas_filter
+getImageData 和 putImageData运用之滤镜效果制作

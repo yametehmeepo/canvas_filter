@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<title>getImageData 和 putImageData运用之滤镜效果制作</title>
+	<style>
+		html,body{
+			margin: 0;
+			padding: 0;
+		}
+		#mask{
+			position: fixed;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 999;
+			background: rgba(0, 0, 0, 0.8);
+		}
+		#mask span{
+			display: block;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 18px;
+			line-height: 1;
+			color: #fff;
+		}
+	</style>
+</head>
+<body>
+	<div style="width: 1700px;margin: 20px auto">
+		<canvas id="canvasa" width="800" height="560" style="border: 1px solid #eee; display: block; float: left">您的浏览器不支持canvas</canvas>
+		<canvas id="canvasb" width="800" height="560" style="border: 1px solid #eee; display: block; float: right">您的浏览器不支持canvas</canvas>
+	</div>
+	<div style="clear: both"></div>
+	<div style="text-align: center;margin: 20px 0 0;">
+		<a href="javascript: filter()">filter</a>
+	</div>
+	<div id="mask"><span>图片加载中, 请稍候...</span></div>
+	<script>
+		var canvasa = document.getElementById('canvasa');
+		var canvasb = document.getElementById('canvasb');
+		var contexta = canvasa.getContext('2d');
+		var contextb = canvasb.getContext('2d');
+		var image = new Image();
+		//var canvasWidth = 1152;//3456
+		//var canvasHeight = 768;//2304
+		window.onload = function(){
+			//canvas.width = canvasWidth;
+			//canvas.height = canvasHeight;
+			image.src = './autumn.jpg';
+			image.onload = function(){
+				var mask = document.getElementById('mask');
+				mask.style.display = 'none';
+
+				contexta.drawImage(image, 0, 0, canvasa.width, canvasa.height);
+			}
+		}
+		function filter(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var piexlData = imageData.data;
+			for(var i = 0; i < canvasb.width * canvasb.height; i++){
+				piexlData[4*i+0] = 0;
+			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
+	</script>
+</body>
+</html>
+
