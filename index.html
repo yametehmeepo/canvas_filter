@@ -47,17 +47,18 @@
 	</div>
 	<div style="clear: both"></div>
 	<div class="filterstyle">
+		<a href="javascript: noEffect()">无滤镜</a>
 		<a href="javascript: grayEffect()">灰色滤镜</a>
 		<!-- <a href="javascript: grayscaleEffect()">灰阶滤镜</a> -->
 		<a href="javascript: blackEffect()">黑白滤镜</a>
 		<a href="javascript: reverseEffect()">反色滤镜</a>
+		<a href="javascript: reminiscenceEffect()">怀旧滤镜</a>
 		<a href="javascript: fuzzyEffect(1)">模糊滤镜(1像素)</a>
 		<a href="javascript: fuzzyEffect(3)">模糊滤镜(3像素)</a>
 		<a href="javascript: mosaicEffect(2)">马赛克滤镜(2像素)</a>
 		<a href="javascript: mosaicEffect(4)">马赛克滤镜(4像素)</a>
 		<a href="javascript: mosaicEffect(8)">马赛克滤镜(8像素)</a>
 		<a href="javascript: mosaicEffect(16)">马赛克滤镜(16像素)</a>
-		<a href="javascript: mosaicEffect()">马赛克滤镜(默认)</a>
 	</div>
 	<div id="mask"><span>图片加载中, 请稍候...</span></div>
 	<script>
@@ -71,13 +72,18 @@
 		window.onload = function(){
 			//canvas.width = canvasWidth;
 			//canvas.height = canvasHeight;
-			image.src = './autumn.jpg';
+			image.src = './2.jpg';
 			image.onload = function(){
 				var mask = document.getElementById('mask');
 				mask.style.display = 'none';
 
 				contexta.drawImage(image, 0, 0, canvasa.width, canvasa.height);
 			}
+		}
+		function noEffect(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
 		}
 		function grayEffect(){
 			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
@@ -136,6 +142,22 @@
 			}
 			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
 		}
+		function reminiscenceEffect(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			for(var i = 0; i < canvasb.width * canvasb.height; i++){
+				var r = pixelData[4*i + 0],
+					g = pixelData[4*i + 1],
+					b = pixelData[4*i + 2];
+				var newR = 0.393*r + 0.769*g + 0.189*b,
+					newG = 0.349*r + 0.686*g + 0.168*b,
+					newB = 0.272*r + 0.534*g + 0.131*b;
+				pixelData[4*i+0] = newR;
+				pixelData[4*i+1] = newG;
+				pixelData[4*i+2] = newB;
+			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
 		function fuzzyEffect(fuzzyR){
 			var tmpImageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
 			var tmpPixelData = tmpImageData.data;
@@ -176,7 +198,7 @@
 			var pixelData = imageData.data;
 
 			mosaicR = mosaicR?mosaicR:4;
-			
+
 			var totalmosaicnum = mosaicR*mosaicR;
 			for(var i = 0; i < canvasb.height; i+=mosaicR){
 				for(var j = 0; j < canvasb.width; j+=mosaicR){
