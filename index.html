@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-	<title>getImageData 和 putImageData运用之滤镜效果制作</title>
+	<title>getImageData 和 putImageData运用之--各种滤镜效果制作</title>
 	<style>
 		html,body{
 			margin: 0;
@@ -37,7 +37,12 @@
 	</div>
 	<div style="clear: both"></div>
 	<div style="text-align: center;margin: 20px 0 0;">
-		<a href="javascript: filter()">filter</a>
+		<a href="javascript: grayEffect()">灰色滤镜</a>
+		<!-- <a href="javascript: grayscaleEffect()">灰阶滤镜</a> -->
+		<a href="javascript: blackEffect()">黑白滤镜</a>
+		<a href="javascript: reverseEffect()">反色滤镜</a>
+		<a href="javascript: fuzzyEffect()">模糊滤镜</a>
+		<a href="javascript: mosaicEffect()">马赛克滤镜</a>
 	</div>
 	<div id="mask"><span>图片加载中, 请稍候...</span></div>
 	<script>
@@ -59,12 +64,96 @@
 				contexta.drawImage(image, 0, 0, canvasa.width, canvasa.height);
 			}
 		}
-		function filter(){
+		function grayEffect(){
 			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
-			var piexlData = imageData.data;
+			var pixelData = imageData.data;
 			for(var i = 0; i < canvasb.width * canvasb.height; i++){
-				piexlData[4*i+0] = 0;
+				var r = pixelData[4*i+0];
+				var g = pixelData[4*i+1];
+				var b = pixelData[4*i+2];
+				var gray = r*0.3 + g * 0.59 + b*0.11;
+				pixelData[4*i+0] = gray;
+				pixelData[4*i+1] = gray;
+				pixelData[4*i+2] = gray;
 			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
+		function grayscaleEffect(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			for(var i = 0; i < pixelData.length; i+=4){
+				var r = pixelData[i+0];
+				var g = pixelData[i+1];
+				var b = pixelData[i+2];
+				var average = Math.floor((r+g+b)/3);
+				pixelData[i+0] = average;
+				pixelData[i+1] = average;
+				pixelData[i+2] = average;
+			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
+		function blackEffect(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			for(var i = 0; i < canvasb.width * canvasb.height; i++){
+				var r = pixelData[4*i+0];
+				var g = pixelData[4*i+1];
+				var b = pixelData[4*i+2];
+				var gray = r*0.3 + g * 0.59 + b*0.11;
+				if(gray > 255/2){
+					v = 255;
+				}else{
+					v = 0;
+				}
+				pixelData[4*i+0] = v;
+				pixelData[4*i+1] = v;
+				pixelData[4*i+2] = v;
+			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
+		function reverseEffect(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			for(var i = 0; i < canvasb.width * canvasb.height; i++){
+				pixelData[4*i+0] = 255 - pixelData[4*i+0];
+				pixelData[4*i+1] = 255 - pixelData[4*i+1];
+				pixelData[4*i+2] = 255 - pixelData[4*i+2];
+			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
+		function fuzzyEffect(){
+			var tmpImageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var tmpPixelData = tmpImageData.data;
+
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			for(var i = 0; i < canvasa.height; i++){
+				for(var j = 0; j < canvasa.width; j++){
+
+					var totalr = 0, totalg = 0, totalb = 0;
+					
+					for(var dx = -1; dx <= 1; dx++){
+						for(var dy = -1; dy <= 1; dy++){
+							var x = dx + j;
+							var y = dy + i;
+							var dp = y*canvasa.width + x;
+							totalr += tmpPixelData[dp*4 + 0];
+							totalg += tmpPixelData[dp*4 + 1];
+							totalb += tmpPixelData[dp*4 + 2];
+						}
+					}
+					var p = i*canvasa.width + j;//第i+1行第j+1列像素点所对应的pixelData的第p点
+					pixelData[p*4 + 0] = totalr/9;
+					pixelData[p*4 + 1] = totalg/9;
+					pixelData[p*4 + 2] = totalb/9;
+				}
+			}
+			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
+		}
+		function mosaicEffect(){
+			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var pixelData = imageData.data;
+			
 			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
 		}
 	</script>
