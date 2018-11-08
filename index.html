@@ -28,6 +28,16 @@
 			line-height: 1;
 			color: #fff;
 		}
+		.filterstyle{
+			text-align: center;
+			margin: 20px 0 0;
+		}
+		.filterstyle a{
+			text-decoration: none;
+		}
+		.filterstyle a + a{
+			margin-left: 10px;
+		}
 	</style>
 </head>
 <body>
@@ -36,14 +46,18 @@
 		<canvas id="canvasb" width="800" height="560" style="border: 1px solid #eee; display: block; float: right">您的浏览器不支持canvas</canvas>
 	</div>
 	<div style="clear: both"></div>
-	<div style="text-align: center;margin: 20px 0 0;">
+	<div class="filterstyle">
 		<a href="javascript: grayEffect()">灰色滤镜</a>
 		<!-- <a href="javascript: grayscaleEffect()">灰阶滤镜</a> -->
 		<a href="javascript: blackEffect()">黑白滤镜</a>
 		<a href="javascript: reverseEffect()">反色滤镜</a>
 		<a href="javascript: fuzzyEffect(1)">模糊滤镜(1像素)</a>
 		<a href="javascript: fuzzyEffect(3)">模糊滤镜(3像素)</a>
-		<a href="javascript: mosaicEffect()">马赛克滤镜</a>
+		<a href="javascript: mosaicEffect(2)">马赛克滤镜(2像素)</a>
+		<a href="javascript: mosaicEffect(4)">马赛克滤镜(4像素)</a>
+		<a href="javascript: mosaicEffect(8)">马赛克滤镜(8像素)</a>
+		<a href="javascript: mosaicEffect(16)">马赛克滤镜(16像素)</a>
+		<a href="javascript: mosaicEffect()">马赛克滤镜(默认)</a>
 	</div>
 	<div id="mask"><span>图片加载中, 请稍候...</span></div>
 	<script>
@@ -153,10 +167,52 @@
 			}
 			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
 		}
-		function mosaicEffect(){
+		function mosaicEffect(mosaicR){
+			//mosaicR数值有讲究，需要参照图片宽高像素值，取一个两者都可以整除的数
+			var tmpImageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
+			var tmpPixelData = tmpImageData.data;
+
 			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
 			var pixelData = imageData.data;
+
+			mosaicR = mosaicR?mosaicR:4;
 			
+			var totalmosaicnum = mosaicR*mosaicR;
+			for(var i = 0; i < canvasb.height; i+=mosaicR){
+				for(var j = 0; j < canvasb.width; j+=mosaicR){
+
+					var totalr = 0, totalg = 0, totalb = 0;
+					for(var dx = 0; dx < mosaicR; dx++){
+						for(var dy = 0; dy < mosaicR; dy++){
+							var x = dx + j;
+							var y = dy + i;
+							var dp = y*canvasa.width + x;
+							totalr += tmpPixelData[dp*4 + 0];
+							totalg += tmpPixelData[dp*4 + 1];
+							totalb += tmpPixelData[dp*4 + 2];
+						}
+					}
+
+					var averager = totalr/totalmosaicnum;
+					var averageg = totalg/totalmosaicnum;
+					var averageb = totalb/totalmosaicnum;
+
+					for(var dx = 0; dx < mosaicR; dx++){
+						for(var dy = 0; dy < mosaicR; dy++){
+							var x = dx + j;
+							var y = dy + i;
+							var p = y*canvasa.width + x;
+							pixelData[p*4 + 0] = averager;
+							pixelData[p*4 + 1] = averageg;
+							pixelData[p*4 + 2] = averageb;
+						}
+					}
+
+				}
+			}
+
+
+
 			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
 		}
 	</script>
