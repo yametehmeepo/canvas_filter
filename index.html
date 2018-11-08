@@ -41,7 +41,8 @@
 		<!-- <a href="javascript: grayscaleEffect()">灰阶滤镜</a> -->
 		<a href="javascript: blackEffect()">黑白滤镜</a>
 		<a href="javascript: reverseEffect()">反色滤镜</a>
-		<a href="javascript: fuzzyEffect()">模糊滤镜</a>
+		<a href="javascript: fuzzyEffect(1)">模糊滤镜(1像素)</a>
+		<a href="javascript: fuzzyEffect(3)">模糊滤镜(3像素)</a>
 		<a href="javascript: mosaicEffect()">马赛克滤镜</a>
 	</div>
 	<div id="mask"><span>图片加载中, 请稍候...</span></div>
@@ -121,19 +122,21 @@
 			}
 			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
 		}
-		function fuzzyEffect(){
+		function fuzzyEffect(fuzzyR){
 			var tmpImageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
 			var tmpPixelData = tmpImageData.data;
 
 			var imageData = contexta.getImageData(0, 0, canvasa.width, canvasa.height);
 			var pixelData = imageData.data;
-			for(var i = 0; i < canvasa.height; i++){
-				for(var j = 0; j < canvasa.width; j++){
+
+			var totalfuzzynum = (2*fuzzyR + 1)*(2*fuzzyR + 1);
+			for(var i = fuzzyR; i < canvasa.height - fuzzyR; i++){
+				for(var j = fuzzyR; j < canvasa.width - fuzzyR; j++){
 
 					var totalr = 0, totalg = 0, totalb = 0;
 					
-					for(var dx = -1; dx <= 1; dx++){
-						for(var dy = -1; dy <= 1; dy++){
+					for(var dx = -fuzzyR; dx <= fuzzyR; dx++){
+						for(var dy = -fuzzyR; dy <= fuzzyR; dy++){
 							var x = dx + j;
 							var y = dy + i;
 							var dp = y*canvasa.width + x;
@@ -143,9 +146,9 @@
 						}
 					}
 					var p = i*canvasa.width + j;//第i+1行第j+1列像素点所对应的pixelData的第p点
-					pixelData[p*4 + 0] = totalr/9;
-					pixelData[p*4 + 1] = totalg/9;
-					pixelData[p*4 + 2] = totalb/9;
+					pixelData[p*4 + 0] = totalr/totalfuzzynum;
+					pixelData[p*4 + 1] = totalg/totalfuzzynum;
+					pixelData[p*4 + 2] = totalb/totalfuzzynum;
 				}
 			}
 			contextb.putImageData(imageData, 0, 0, 0, 0, canvasb.width, canvasb.height);
